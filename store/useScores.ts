@@ -10,8 +10,8 @@ export const useScoreStore = defineStore('scores', {
         userScores: (state) => state.scores,
     },
     actions: {
-        addScore(score: number) {
-            this.scores.push({timestamp: Date.now(), score: score });
+        addScore(score: number, gameMode: number) {
+            this.scores.push({timestamp: Date.now(), score: score, mode: gameMode });
         }
     }
 });
@@ -19,4 +19,5 @@ export const useScoreStore = defineStore('scores', {
 interface Score {
     timestamp: number,
     score: number
+    mode: number
 }

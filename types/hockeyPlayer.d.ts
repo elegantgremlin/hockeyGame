@@ -1,4 +1,4 @@
 declare interface HockeyPlayer {
     name: string;
-    goals: number;
+    statValue: number;
 }

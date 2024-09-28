@@ -11,13 +11,14 @@ useSeoMeta({
 const store = useScoreStore();
 
 const gameState = ref(0);
+const gameMode = ref('0');
 const updating = ref(false);
 const guessResult = ref(0);
 const score = ref(-1);
 const strikes = ref(3);
 
-const playerA = ref({ name: '', goals: 0 });
-const playerB = ref({ name: '', goals: 0 });
+const playerA = ref({ name: '', statValue: 0 });
+const playerB = ref({ name: '', statValue: 0 });
 
 const effectTimeout = 250;
 
@@ -40,7 +41,7 @@ const pickPlayerA = async () => {
 
     updating.value = true;
 
-    checkGuess(playerA.value.goals, playerB.value.goals);
+    checkGuess(playerA.value.statValue, playerB.value.statValue);
     
     await updateGame();
 
@@ -54,7 +55,7 @@ const pickPlayerB = async () => {
 
     updating.value = true;
 
-    checkGuess(playerB.value.goals, playerA.value.goals);
+    checkGuess(playerB.value.statValue, playerA.value.statValue);
 
     await updateGame();
 
@@ -89,14 +90,14 @@ const updateGame = async () => {
 }
 
 const changePlayers = async () => {
-    const playerData = await $fetch<HockeyPlayer[]>('/api/players');
+    const playerData = await $fetch<HockeyPlayer[]>(`/api/players/${gameMode.value}`);
 
     playerA.value = playerData[0];
     playerB.value = playerData[1];
 }
 
 const completeGame = () => {
-    store.addScore(score.value);
+    store.addScore(score.value, Number(gameMode.value));
     gameState.value = 2;
 }
 
@@ -106,7 +107,31 @@ const completeGame = () => {
     <Card v-if="gameState == 0">
         <template #title>How to Play</template>
         <template #content>
-            <p>Pick the player with the higher amount of career goals. Get as many right before accumulating three strikes.</p>
+            <p>Pick the player with the higher amount of the selected stat. Get as many right before accumulating three strikes.</p>
+            <br />
+            <p>Choose stat:</p>
+            <div class="flex flex-wrap gap-4">
+                <div class="flex items-center">
+                    <RadioButton v-model="gameMode" inputId="gameMode0" name="mode" value="0" />
+                    <label for="gameMode0" class="ml-2">Goals</label>
+                </div>
+                <div class="flex items-center">
+                    <RadioButton v-model="gameMode" inputId="gameMode1" name="mode" value="1" />
+                    <label for="gameMode1" class="ml-2">Assists</label>
+                </div>
+                <div class="flex items-center">
+                    <RadioButton v-model="gameMode" inputId="gameMode2" name="mode" value="2" />
+                    <label for="gameMode2" class="ml-2">Points</label>
+                </div>
+                <div class="flex items-center">
+                    <RadioButton v-model="gameMode" inputId="gameMode3" name="mode" value="3" />
+                    <label for="gameMode3" class="ml-2">Plus/Minus</label>
+                </div>
+                <div class="flex items-center">
+                    <RadioButton v-model="gameMode" inputId="gameMode4" name="mode" value="4" />
+                    <label for="gameMode4" class="ml-2">PIM</label>
+                </div>
+            </div>
             <Button label="Start" @click="startGame()" class="mt-5" />
         </template>
     </Card>
@@ -132,8 +157,11 @@ const completeGame = () => {
         <template #title>Game Over</template>
         <template #content>
             <p>Final Score: {{ score }}</p>
-            <Button label="Try Again" @click="startGame()" class="mt-5 mr-2" />
-            <Button label="Back to Menu" @click="backToMenu()" severity="secondary" class="mt-5" />
+            <br />
+            <div class="flex flex-wrap gap-4">
+                <Button label="Try Again" @click="startGame()" />
+                <Button label="Back to Menu" @click="backToMenu()" severity="secondary" />
+            </div>
         </template>
     </Card>
 </template>

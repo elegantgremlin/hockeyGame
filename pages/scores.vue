@@ -26,6 +26,11 @@ const scores = ref(store.userScores);
                         {{ new Date(slotProps.data.timestamp).toLocaleString('en-US') }}
                     </template>
                 </Column>
+                <Column field="mode" header="Mode">
+                    <template #body="slotProps">
+                        {{ translateGameModeFancy(slotProps.data.mode.toString()) }}
+                    </template>
+                </Column>
                 <Column field="score" header="Score"></Column>
             </DataTable>
         </template>
