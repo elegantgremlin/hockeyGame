@@ -29,12 +29,12 @@ const items = ref([
                 <img src="/assets/logo.svg" height="45px" width="45px" />
             </template>
             <template #item="{ item, props, hasSubmenu }">
-                <router-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
+                <nuxt-link v-if="item.route" v-slot="{ href, navigate }" :to="item.route" custom>
                     <a v-ripple :href="href" v-bind="props.action" @click="navigate">
                         <span :class="item.icon" />
                         <span class="ml-2">{{ item.label }}</span>
                     </a>
-                </router-link>
+                </nuxt-link>
                 <a v-else v-ripple :href="item.url" :target="item.target" v-bind="props.action">
                     <span :class="item.icon" />
                     <span class="ml-2">{{ item.label }}</span>
