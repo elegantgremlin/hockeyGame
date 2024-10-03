@@ -16,6 +16,7 @@ const updating = ref(false);
 const guessResult = ref(0);
 const score = ref(-1);
 const strikes = ref(3);
+const answers = ref<LogEntry[]>([]);
 
 const playerA = ref({ name: '', statValue: 0 });
 const playerB = ref({ name: '', statValue: 0 });
@@ -28,6 +29,7 @@ const startGame = async () => {
     gameState.value = 1;
     score.value = 0;
     strikes.value = 3;
+    answers.value = [];
 }
 
 const backToMenu = () => {
@@ -41,7 +43,9 @@ const pickPlayerA = async () => {
 
     updating.value = true;
 
-    checkGuess(playerA.value.statValue, playerB.value.statValue);
+    const correct = checkGuess(playerA.value.statValue, playerB.value.statValue);
+
+    addToLog(correct);
     
     await updateGame();
 
@@ -55,11 +59,19 @@ const pickPlayerB = async () => {
 
     updating.value = true;
 
-    checkGuess(playerB.value.statValue, playerA.value.statValue);
+    const correct = checkGuess(playerB.value.statValue, playerA.value.statValue);
+
+    addToLog(correct);
 
     await updateGame();
 
     updating.value = false;
+}
+
+const addToLog = (correct: boolean) => {
+    const rightAnswer = (playerA.value.statValue > playerB.value.statValue) ? playerA.value.name : playerB.value.name;
+
+    answers.value.unshift({ playerA: playerA.value.name, playerB: playerB.value.name, rightAnswer: rightAnswer, correct: correct })
 }
 
 const checkGuess = (guess: number, compareTo: number) => {
@@ -67,10 +79,14 @@ const checkGuess = (guess: number, compareTo: number) => {
         score.value++;
 
         activateEffect(2);
+
+        return true;
     } else {
         strikes.value--;
-
+        
         activateEffect(1);
+        
+        return false;
     }
 }
 
@@ -151,12 +167,14 @@ const completeGame = () => {
             <Button :label="playerA.name" @click="pickPlayerA()" :disabled="updating" />
             vs
             <Button :label="playerB.name" @click="pickPlayerB()" :disabled="updating" />
+            <LogTable :answers="answers" />
         </template>
     </Card>
     <Card v-if="gameState === 2">
         <template #title>Game Over</template>
         <template #content>
             <p>Final Score: {{ score }}</p>
+            <LogTable :answers="answers" />
             <br />
             <div class="flex flex-wrap gap-4">
                 <Button label="Try Again" @click="startGame()" />
